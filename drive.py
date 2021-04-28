@@ -21,6 +21,8 @@ app = Flask(__name__)
 model = None
 prev_image_array = None
 
+from model include high_value_emphasizing_loss
+
 
 class SimplePIController:
     def __init__(self, Kp, Ki):
