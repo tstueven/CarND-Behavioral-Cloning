@@ -70,7 +70,7 @@ checkpoint = ModelCheckpoint(filepath=save_path, monitor='val_loss', save_best_o
 
 # custom loss function to put higher emphasis on large steering angles for which we have relatively little data
 def high_value_emphasizing_loss(y_true, y_pred):
-    weighted_squared_difference = (y_true - y_pred) ** 2 * (1 + 100 * np.abs(y_true))  # what if true = 0?
+    weighted_squared_difference = (y_true - y_pred) ** 2 * (1 + 100 * np.abs(y_true))
     return weighted_squared_difference
 
 
