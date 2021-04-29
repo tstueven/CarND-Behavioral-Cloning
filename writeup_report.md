@@ -14,21 +14,19 @@ The goals / steps of this project are the following:
 * Test that the model successfully drives around track one without leaving the road
 * Summarize the results with a written report
 
-[//]: # (Image References)
+[center]: ./examples/center.jpg "Center"
 
-[image1]: ./examples/placeholder.png "Model Visualization"
+[center_flipped]: ./examples/center_flipped.jpg "Center flipped"
 
-[image2]: ./examples/placeholder.png "Grayscaling"
+[left]: ./examples/left.jpg "Left"
 
-[image3]: ./examples/placeholder_small.png "Recovery Image"
+[left_flipped]: ./examples/left_flipped.jpg "Left flipped"
 
-[image4]: ./examples/placeholder_small.png "Recovery Image"
+[right]: ./examples/left.jpg "Right"
 
-[image5]: ./examples/placeholder_small.png "Recovery Image"
+[right_flipped]: ./examples/left_flipped.jpg "Right flipped"
 
-[image6]: ./examples/placeholder_small.png "Normal Image"
-
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[loss_evo]: ./examples/loss_evolution.png "Model evolution"
 
 ## Rubric Points
 
@@ -55,6 +53,8 @@ executing
 ```sh
 python drive.py model.h5
 ```
+
+There is a minor modification in teh drive.py file to allow loading models that were saved with a custom loss function.
 
 #### 3. Submission code is usable and readable
 
@@ -191,32 +191,38 @@ Non-trainable params: 7,635,264
 
 #### 3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example
-image of center lane driving:
+For aforementioned reasons I had to rely on the training data provided with the project. As far as I can see they were
+taken from one lap driven in the reversed direction.
 
-![alt text][image2]
+There are images from three different camera positions: center, left, and right. Examples below:
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle
-would learn to .... These images show what a recovery looks like starting from ... :
+![alt text][center]
+![alt text][left]
+![alt text][right]
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+For the left and right images, the steering angle had to be corrected for training since later only the center image is
+used as input and it should work with that. The correction is done when loading the data (model.py lines 47 + 56). For
+the left image the angle has to be increased, for the right decreased. 0.25 rad turned aut to be a good correction
+value.
 
-Then I repeated this process on track two in order to get more data points.
+To have a little more data available, especially some leftward curves as well, I flipped the images and added those to
+the data as well. The steering angle was multiplied by -1 for these data.
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image
-that has then been flipped:
+![alt text][center_flipped]
+![alt text][left_flipped]
+![alt text][right_flipped]
 
-![alt text][image6]
-![alt text][image7]
+That in the end led to 48216, 38572 of which were randomly chosen for training, 9644 for validation.
 
-Etc ....
+I then started training with up to 50 epochs. I likely never need as many here but since there is an early stopping
+callback in place there is no harm in choosing a higher number. The evolution of the training and validation loss can be
+seen below:
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+![alt text][loss_evo]
 
-I finally randomly shuffled the data set and put Y% of the data into a validation set.
-
-I used this training data for training the model. The validation set helped determine if the model was over or under
-fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the
-learning rate wasn't necessary.
+The train loss starts at the very lage value (logscale!) of 1421.62. Since there are more than 13 M parameters to fit
+that is probably not surprising. The validation loss at the end of that training cycle is already a lot lower, 6.68. The
+validation continue to perform better for a while, likely because there is no dropout involved. Train and validation
+loss drop quickly first but especially the validation soon gets towards saturation. After the tenth epoch (counting in 0
+like in plot), right before the training loss becomes better, the minimum is reached. At that point the model was saved
+by a ModelCheckpoint callback and used for training. 
