@@ -94,7 +94,7 @@ x = Flatten()(x)
 x = Dropout(rate=0.4)(x)
 x = Dense(256)(x)
 x = Activation('relu')(x)
-x = Dropout(rate=0.3)(x) # higher dropout close to regression result seemed to lead to problems
+x = Dropout(rate=0.2)(x) # higher dropout close to regression result seemed to lead to problems
 x = Dense(100)(x)
 x = Activation('relu')(x)
 x = Dense(1)(x)
